@@ -1,0 +1,25 @@
+{
+  "$schema": "https://www.krakend.io/schema/v3.json",
+  "version": 3,
+  "name": "Gateway",
+  "port": 8080,
+  "endpoints": [
+    {
+      "endpoint": "server1",
+      "backend": [
+        {
+          "host": ["0.0.0.0:3000"],
+          "url_pattern": "/hello"
+        }
+      ]
+    },
+    {
+      "endpoint": "server2",
+      "backend": [
+        {
+          "host": ["0.0.0.0:3001"],
+          "url_pattern": "/hello"
+        }
+      ]
+    }
+  ]

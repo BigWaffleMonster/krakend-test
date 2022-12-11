@@ -1,22 +1,28 @@
-version: "3.9"
+version: '3.9'
 
 services:
   server1:
     container_name: server1
     image: server1
     restart: always
-    build:
-      context: .
-      dockerfile: ./server1/Dockerfile
+    build: ./server1
     ports:
-      - "3000:3000" 
+      - '3000:3000'
 
   server2:
     container_name: server2
     image: server2
     restart: always
-    build:
-      context: .
-      dockerfile: ./server2/Dockerfile
+    build: ./server2
     ports:
-      - "3000:3000"
+      - '3001:3001'
+
+  api_gateway:
+    image: devopsfaith/krakend:watch
+    container_name: api_gateway
+    ports:
+      - '8080:8080'
+    command: ['run', '-d', '-c', 'krakend.json']
+    depends_on:
+      - server1
+      - server2

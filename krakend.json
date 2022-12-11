@@ -1,25 +1,49 @@
 {
   "$schema": "https://www.krakend.io/schema/v3.json",
   "version": 3,
-  "name": "Gateway",
-  "port": 8080,
+  "name": "KrakenD",
+  "timeout": "3000ms",
+  "cache_ttl": "300s",
+  "output_encoding": "json",
+
   "endpoints": [
     {
-      "endpoint": "server1",
+      "endpoint": "/default-behavior",
       "backend": [
         {
-          "host": ["0.0.0.0:3000"],
-          "url_pattern": "/hello"
+          "url_pattern": "/__debug/default"
         }
       ]
     },
     {
-      "endpoint": "server2",
+      "endpoint": "/v1/server1",
+      "method": "GET",
+      "output_encoding": "json",
       "backend": [
         {
-          "host": ["0.0.0.0:3001"],
-          "url_pattern": "/hello"
+          "url_pattern": "/hello",
+          "encoding": "json",
+          "sd": "static",
+          "method": "GET",
+          "host": ["http://localhost:3000"],
+          "disable_host_sanitize": false
+        }
+      ]
+    },
+    {
+      "endpoint": "/v1/server2",
+      "method": "GET",
+      "output_encoding": "json",
+      "backend": [
+        {
+          "url_pattern": "/hello",
+          "encoding": "json",
+          "sd": "static",
+          "method": "GET",
+          "host": ["http://localhost:3001"],
+          "disable_host_sanitize": false
         }
       ]
     }
   ]
+}

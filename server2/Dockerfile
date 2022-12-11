@@ -1,6 +1,6 @@
-FROM node:alpine
+FROM node:16
 
-WORKDIR /server2
+WORKDIR /usr/src/server2
 
 COPY package*.json ./
 
@@ -8,4 +8,4 @@ RUN npm install
 
 COPY . .
 
-CMD ["node", "./index.js"] 
+CMD [ "node", "index.js" ]

@@ -1,13 +1,27 @@
-version: '3.9'
+version: '3.4'
 
 services:
+  mongo:
+    image: mongo
+    restart: always
+    volumes:
+      - ./data:/data/db
+    ports:
+      - 27017:27017
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: example
+    depends_on:
+      - server1
+      - server2
+
   server1:
     container_name: server1
     image: server1
     restart: always
     build: ./server1
     ports:
-      - '3000:3000'
+      - '3002:3002'
 
   server2:
     container_name: server2
@@ -17,12 +31,60 @@ services:
     ports:
       - '3001:3001'
 
+  jaeger:
+    image: jaegertracing/all-in-one:latest
+    environment:
+      - JAEGER_DISABLED=false
+    expose:
+      - '16686'
+      - '6831/udp'
+    ports:
+      - '5775:5775/udp'
+      - '6831:6831/udp'
+      - '6832:6832/udp'
+      - '16685:16685/tcp'
+      - '5778:5778'
+      - '16686:16686'
+      - '14268:14268'
+      - '9411:9411'
+
+  prometheus:
+    image: prom/prometheus:latest
+    volumes:
+      - ./server2/prometheus:/etc/prometheus/
+    container_name: prometheus
+    hostname: prometheus
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+    ports:
+      - '9090:9090'
+    restart: unless-stopped
+    environment:
+      TZ: 'Europe/Moscow'
+
+  grafana:
+    container_name: grafana
+    image: grafana/grafana
+    hostname: grafana
+    ports:
+      - '3000:3000'
+    volumes:
+      - ./grafana/provisioning/datasources:/etc/grafana/provisioning/datasources
+
   api_gateway:
     image: devopsfaith/krakend:watch
     container_name: api_gateway
+    volumes:
+      - ./KrakenD:/etc/krakend
     ports:
       - '8080:8080'
-    command: ['run', '-d', '-c', 'krakend.json']
+    command: ['run', '-d', '-c', '/etc/krakend/krakend.json']
+    healthcheck:
+      test: curl -f http://server1:3000/__health
+      timeout: 30s
+      interval: 10s
+      retries: 5
+      start_period: 5s
     depends_on:
       - server1
       - server2

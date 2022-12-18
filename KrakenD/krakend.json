@@ -1,0 +1,122 @@
+{
+  "$schema": "https://www.krakend.io/schema/v3.json",
+  "version": 3,
+  "name": "KrakenD",
+  "timeout": "3000ms",
+  "cache_ttl": "300s",
+  "output_encoding": "json",
+
+  "extra_config": {
+    "security/cors": {
+      "allow_origins": [
+        "*"
+      ],
+      "allow_methods": [
+        "GET",
+        "HEAD",
+        "POST"
+      ],
+      "expose_headers": [
+        "Content-Length",
+        "Content-Type"
+      ],
+      "allow_headers": [
+        "Accept-Language"
+      ],
+      "max_age": "12h"
+    },
+    "telemetry/opencensus": {
+      "sample_rate": 100,
+      "reporting_period": 0,
+      "exporters": {
+        "jaeger": {
+          "endpoint": "http://jaeger:14268/api/traces",
+          "service_name":"krakend",
+          "buffer_max_count": 1000
+        }
+      }
+    }
+  },
+
+  "endpoints": [
+    {
+      "endpoint": "/default-behavior",
+      "backend": [
+        {
+          "url_pattern": "/__debug/default"
+        }
+      ]
+    },
+    {
+      "endpoint": "/v1/server1",
+      "method": "GET",
+      "output_encoding": "json",
+      "backend": [
+        {
+          "url_pattern": "/hello",
+          "encoding": "json",
+          "sd": "static",
+          "method": "GET",
+          "host": ["http://server1:3002"]
+        }
+      ]
+    },
+    {
+      "endpoint": "/v1/todo",
+      "method": "POST",
+      "output_encoding": "json",
+      "backend": [
+        {
+          "url_pattern": "/todo",
+          "encoding": "json",
+          "sd": "static",
+          "method": "POST",
+          "host": ["http://server2:3001"]
+        }
+      ]
+    },
+
+    {
+      "endpoint": "/v1/user",
+      "method": "GET",
+      "output_encoding": "json",
+      "backend": [
+        {
+          "url_pattern": "/user",
+          "encoding": "json",
+          "method": "GET",
+          "host": ["http://server2:3001"]
+        }
+      ]
+    },
+    {
+      "endpoint": "/v1/union",
+      "method": "GET",
+      "output_encoding": "safejson",
+      "backend": [
+        {
+          "url_pattern": "/world",
+          "encoding": "safejson",
+          "sd": "static",
+          "is_collection": true,
+          "method": "GET",
+          "host": ["http://server1:3000"],
+          "mapping": {
+            "collection": "server1"
+          }
+        },
+        {
+          "url_pattern": "/post",
+          "encoding": "safejson",
+          "is_collection": true,
+          "sd": "static",
+          "method": "GET",
+          "host": ["http://server2:3001"],
+          "mapping": {
+            "collection": "server2"
+          }
+        }
+      ]
+    }
+  ] 
+}

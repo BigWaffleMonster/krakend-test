@@ -51,7 +51,7 @@ services:
   prometheus:
     image: prom/prometheus:latest
     volumes:
-      - ./server2/prometheus:/etc/prometheus/
+      - ./prometheus:/etc/prometheus/
     container_name: prometheus
     hostname: prometheus
     command:
